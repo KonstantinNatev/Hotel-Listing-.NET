@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/Users/konstantin.natev/Projects/HotelListing.Api/HotelListing.Api/HotelListing.Api.csproj": {}
+    "/Users/konstantin.natev/Projects/HotelListing.Api/Hotel Listing .NET/HotelListing.Api.csproj": {}
   },
   "projects": {
-    "/Users/konstantin.natev/Projects/HotelListing.Api/HotelListing.Api/HotelListing.Api.csproj": {
+    "/Users/konstantin.natev/Projects/HotelListing.Api/Hotel Listing .NET/HotelListing.Api.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/konstantin.natev/Projects/HotelListing.Api/HotelListing.Api/HotelListing.Api.csproj",
+        "projectUniqueName": "/Users/konstantin.natev/Projects/HotelListing.Api/Hotel Listing .NET/HotelListing.Api.csproj",
         "projectName": "HotelListing.Api",
-        "projectPath": "/Users/konstantin.natev/Projects/HotelListing.Api/HotelListing.Api/HotelListing.Api.csproj",
+        "projectPath": "/Users/konstantin.natev/Projects/HotelListing.Api/Hotel Listing .NET/HotelListing.Api.csproj",
         "packagesPath": "/Users/konstantin.natev/.nuget/packages/",
-        "outputPath": "/Users/konstantin.natev/Projects/HotelListing.Api/HotelListing.Api/obj/",
+        "outputPath": "/Users/konstantin.natev/Projects/HotelListing.Api/Hotel Listing .NET/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/konstantin.natev/.nuget/NuGet/NuGet.Config"
@@ -49,6 +49,20 @@
             "Microsoft.AspNetCore.OpenApi": {
               "target": "Package",
               "version": "[10.0.11, )"
+            },
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[10.0.12, )"
+            },
+            "Microsoft.EntityFrameworkCore.Design": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[10.0.12, )"
+            },
+            "Microsoft.EntityFrameworkCore.SqlServer": {
+              "target": "Package",
+              "version": "[10.0.12, )"
             },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
