@@ -2,9 +2,11 @@ using HotelListing.Api.Data;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+var conectionString = builder.Configuration.GetConnectionString("HotelListingDbConn");
 
 // Add services to the container.
-
+builder.Services.AddDbContext<HotelListingDbContext>(options =>
+    options.UseSqlServer(conectionString));
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
