@@ -1,7 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using HotelListing.api.Results;
+using HotelListing.Api.Constants;
 using HotelListing.Api.Contracts;
 using HotelListing.Api.Data;
 using HotelListing.Api.DTO.Hotel;
@@ -9,86 +9,97 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HotelListing.Api.Services;
 
-public class HotelsService(HotelListingDbContext context) : IHotelsService
+public class HotelsService(HotelListingDbContext context, IMapper mapper) : IHotelsService
 {
-    public async Task<IEnumerable<GetHotelsDto>> GetHotelsAsync()
+    public async Task<Result<IEnumerable<GetHotelsDto>>> GetHotelsAsync()
     {
-        var hotels = await context.Hotels.Select(h => new GetHotelsDto(
-            h.Id,
-            h.Name,
-            h.Address,
-            h.Rating,
-            h.CountryId
-        )).ToListAsync();
+        var hotels = await context.Hotels
+            .ProjectTo<GetHotelsDto>(mapper.ConfigurationProvider)
+            .ToListAsync();
 
-        return hotels;
+        return Result<IEnumerable<GetHotelsDto>>.Success(hotels);
     }
 
-    public async Task<GetHotelDto?> GetHotelAsync(int id)
+    public async Task<Result<GetHotelDto?>> GetHotelAsync(int id)
     {
         var hotel = await context.Hotels
-        .Select(h => new GetHotelDto(
-            h.Id,
-            h.Name,
-            h.Address,
-            h.Rating,
-            h.Country!.Name
-        ))
-        .FirstOrDefaultAsync(h => h.Id == id);
+        .Where(h => h.Id == id)
+        .ProjectTo<GetHotelDto>(mapper.ConfigurationProvider)
+        .FirstOrDefaultAsync();
 
-        return hotel ?? null;
+        return hotel is null
+            ? Result<GetHotelDto?>.NotFound(new Error(ErrorCodes.NotFound, $"Hotel with ID {id} was not found."))
+            : Result<GetHotelDto?>.Success(hotel);
     }
 
-    public async Task<GetHotelsDto> CreateHotelAsync(CreateHotelDto hotelDto)
+    public async Task<Result<GetHotelDto>> CreateHotelAsync(CreateHotelDto hotelDto)
     {
-        var hotel = new Hotel
+        try
         {
-            Name = hotelDto.Name,
-            Address = hotelDto.Address,
-            Rating = hotelDto.Rating,
-            CountryId = hotelDto.CountryId
-        };
+            var existingHotel = await HotelNameExistsAsync(hotelDto.Name);
+            if (existingHotel)
+            {
+                return Result<GetHotelDto>.Failure(new Error(ErrorCodes.Conflict, $"Hotel with name '{hotelDto.Name}' already exists."));
+            }
 
-        context.Hotels.Add(hotel);
-        await context.SaveChangesAsync();
+            var hotel = mapper.Map<Hotel>(hotelDto);
+            context.Hotels.Add(hotel);
+            await context.SaveChangesAsync();
 
-        var createdHotel = new GetHotelsDto(
-            hotel.Id,
-            hotel.Name,
-            hotel.Address,
-            hotel.Rating,
-            hotel.CountryId);
+            var createdHotel = await context.Hotels
+                .Where(h => h.Id == hotel.Id)
+                .ProjectTo<GetHotelDto>(mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
 
-        return createdHotel;
-    }
-
-    public async Task UpdateHotelAsync(int id, UpdateHotelDto hotelDto)
-    {
-        var hotel = await context.Hotels.FindAsync(id);
-        if (hotel == null)
-        {
-            throw new KeyNotFoundException($"Hotel with ID {id} not found.");
+            return Result<GetHotelDto>.Success(createdHotel);
         }
-
-        hotel.Name = hotelDto.Name;
-        hotel.Address = hotelDto.Address;
-        hotel.Rating = hotelDto.Rating;
-        hotel.CountryId = hotelDto.CountryId;
-
-        context.Entry(hotel).State = EntityState.Modified;
-        await context.SaveChangesAsync();
+        catch (System.Exception)
+        {
+            return Result<GetHotelDto>.Failure();
+        }
     }
 
-    public async Task DeleteHotelAsync(int id)
+    public async Task<Result> UpdateHotelAsync(int id, UpdateHotelDto hotelDto)
+    {
+        try
+        {
+            if (id != hotelDto.Id)
+            {
+                return Result.BadRequest(new Error(ErrorCodes.Validation, "Hotel ID mismatch."));
+            }
+
+            var hotel = await context.Hotels.FindAsync(id);
+            if (hotel is null)
+            {
+                return Result.NotFound(new Error(ErrorCodes.NotFound, $"Hotel with ID {id} not found."));
+            }
+
+            // Automatically cast the incomming data in the hotel            
+            mapper.Map(hotelDto, hotel);
+
+            context.Entry(hotel).State = EntityState.Modified;
+            await context.SaveChangesAsync();
+
+            return Result.Success();
+        }
+        catch (System.Exception)
+        {
+            return Result.Failure(new Error(ErrorCodes.Failure, "An error occurred while updating the hotel."));
+        }
+    }
+
+    public async Task<Result> DeleteHotelAsync(int id)
     {
         var hotel = await context.Hotels.FindAsync(id);
-        if (hotel == null)
+        if (hotel is null)
         {
-            throw new KeyNotFoundException($"Hotel with ID {id} not found.");
+            return Result.NotFound(new Error(ErrorCodes.NotFound, $"Hotel with ID {id} not found."));
         }
 
         context.Hotels.Remove(hotel);
         await context.SaveChangesAsync();
+
+        return Result.Success();
     }
 
     public async Task<bool> HotelExistsAsync(int id)

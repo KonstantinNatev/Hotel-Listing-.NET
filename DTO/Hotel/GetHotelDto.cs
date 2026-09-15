@@ -9,10 +9,13 @@ using System.ComponentModel.DataAnnotations;
 using HotelListing.Api.DTO.Country;
 
 namespace HotelListing.Api.DTO.Hotel;
-public record GetHotelDto (
-    int Id,
-    string Name,
-    string Address,
-    double Rating,
-    string CountryName
-);
+
+public class GetHotelDto
+{
+
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Address { get; set; } = string.Empty;
+    public double Rating { get; set; } = 0;
+    public string CountryName { get; set; } = string.Empty;
+}
