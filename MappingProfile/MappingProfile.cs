@@ -1,10 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using HotelListing.Api.DTO.Hotel;
 using HotelListing.Api.Data;
 using AutoMapper;
@@ -17,11 +10,15 @@ public class HotelMappingProfile : Profile
     public HotelMappingProfile()
     {
         CreateMap<Hotel, GetHotelDto>()
+            .ForMember(dest => dest.CountryName, opt => opt.MapFrom(src => src.Country!.Name));
 
-            .ForMember(dest => dest.CountryName, opt => opt.MapFrom<CountryNameResolver>());
-        CreateMap<CreateHotelDto, Hotel>();
+        CreateMap<Hotel, GetHotelsDto>()
+            .ForMember(dest => dest.CountryName, opt => opt.MapFrom(src => src.Country!.Name));
 
         CreateMap<Hotel, GetHotelsSlimDto>();
+
+        CreateMap<CreateHotelDto, Hotel>();
+        CreateMap<UpdateHotelDto, Hotel>();
     }
 }
 
