@@ -3,9 +3,13 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using HotelListing.Api.DTO.Country;
 using HotelListing.Api.Contracts;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HotelListing.Api.Controllers;
 
+[Route("api/[controller]")]
+[ApiController]
+[Authorize]
 public class CountriesController(ICountriesService countriesService) : BaseApiController
 {
     // GET: api/Countries
@@ -44,6 +48,7 @@ public class CountriesController(ICountriesService countriesService) : BaseApiCo
 
     // DELETE: api/Countries/5
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteCountry(int id)
     {
         var result = await countriesService.DeleteCountryAsync(id);
