@@ -14,13 +14,15 @@ namespace HotelListing.Api.Data
         public DbSet<Country> Countries { get; set; }
         public DbSet<Hotel> Hotels { get; set; }
         public DbSet<ApiKey> ApiKeys { get; set; }
+        public DbSet<HotelAdmin> HotelAdmins { get; set; }
+        public DbSet<Booking> Booking { get; set; }
 
         internal async Task<bool> CountryExistsAsync(int id)
         {
             throw new NotImplementedException();
         }
 
- 
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

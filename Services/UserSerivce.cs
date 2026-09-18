@@ -11,8 +11,18 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace HotelListing.Api.Services;
 
-public class UserSerivce(UserManager<ApplicationUser> userManager, IConfiguration configuration, RoleManager<IdentityRole> roleManager) : IUserSerivce
+public class UserSerivce(UserManager<ApplicationUser> userManager, IConfiguration configuration, RoleManager<IdentityRole> roleManager, IHttpContextAccessor httpContextAccessor) : IUserSerivce
 {
+    public string UserId => httpContextAccessor?
+        .HttpContext?
+        .User?
+        .FindFirst(JwtRegisteredClaimNames.Sub)?.Value
+    ?? httpContextAccessor?
+        .HttpContext?
+        .User?
+        .FindFirst(ClaimTypes.NameIdentifier)?.Value
+    ?? string.Empty;
+
     public async Task<Result<RegisteredUserDto>> RegisterAsync(RegisterUserDto registerUserDto)
     {
         var user = new ApplicationUser
